@@ -4,6 +4,6 @@
 /**
  * 
  */
-module zelda_clone {
+module duck_zelda {
 	requires java.desktop;
 }
