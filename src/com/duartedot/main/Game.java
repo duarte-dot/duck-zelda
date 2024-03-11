@@ -22,14 +22,14 @@ public class Game extends Canvas implements Runnable, KeyListener {
   private static final long serialVersionUID = 1L;
 
   // Variáveis de Dimensão da Janela
-  // private final int WIDTH = 160;
-  // private final int HEIGHT = 120;
+  //  public static final int WIDTH = 160;
+  //  public static final int HEIGHT = 120;
 
-  // private final int WIDTH = 240;
-  // private final int HEIGHT = 160;
+  public static final int WIDTH = 240;
+  public static final int HEIGHT = 160;
 
-  private final int WIDTH = 320;
-  private final int HEIGHT = 240;
+  //  public static final int WIDTH = 320;
+  //  public static final int HEIGHT = 240;
 
   private final int SCALE = 3;
 
@@ -147,6 +147,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 
     int frames = 0;
     double timer = System.currentTimeMillis();
+    requestFocus();
     while (isRunning) {
       long now = System.nanoTime();
       delta += (now - lastTime) / ns;

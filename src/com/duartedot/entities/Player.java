@@ -1,6 +1,8 @@
 package com.duartedot.entities;
 
 import com.duartedot.main.Game;
+import com.duartedot.world.Camera;
+import com.duartedot.world.World;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -40,20 +42,20 @@ public class Player extends Entity {
     moved = false;
     double diagonalSpeed = (speed * Math.sqrt(2)) / 2;
 
-    if (right) {
+    if (right && World.isFree(this.getX() + (int) speed, this.getY())) {
       dir = right_dir;
       moved = true;
       setX(x + (right && up ? diagonalSpeed : speed));
-    } else if (left) {
+    } else if (left && World.isFree(this.getX() - (int) speed, this.getY())) {
       dir = left_dir;
       moved = true;
       setX(x - (left && up ? diagonalSpeed : speed));
     }
 
-    if (up) {
+    if (up && World.isFree(this.getX(), (int) (y - speed))) {
       moved = true;
       setY(y - (up && (right || left) ? diagonalSpeed : speed));
-    } else if (down) {
+    } else if (down && World.isFree(this.getX(), (int) (y + speed))) {
       moved = true;
       setY(y + (down && (right || left) ? diagonalSpeed : speed));
     }
@@ -80,17 +82,42 @@ public class Player extends Entity {
         lastTime = now; // Atualizando o tempo da última atualização
       }
     }
+
+    Camera.x = Camera.clamp(
+      this.getX() - (Game.WIDTH / 2),
+      0,
+      World.WIDTH * 16 - Game.WIDTH
+    );
+
+    Camera.y = Camera.clamp(
+      this.getY() - (Game.HEIGHT / 2),
+      0,
+      World.HEIGHT * 16 - Game.HEIGHT
+    );
   }
 
   public void render(Graphics g) {
-    // g.drawImage(rightPlayer[0], this.getX(), this.getY(), null);
-
     if (dir == right_dir) {
-      g.drawImage(rightPlayer[index], this.getX(), this.getY(), null);
+      g.drawImage(
+        rightPlayer[index],
+        this.getX() - Camera.x,
+        this.getY() - Camera.y,
+        null
+      );
     } else if (dir == left_dir) {
-      g.drawImage(leftPlayer[index], this.getX(), this.getY(), null);
+      g.drawImage(
+        leftPlayer[index],
+        this.getX() - Camera.x,
+        this.getY() - Camera.y,
+        null
+      );
     } else {
-      g.drawImage(rightPlayer[0], this.getX(), this.getY(), null);
+      g.drawImage(
+        rightPlayer[0],
+        this.getX() - Camera.x,
+        this.getY() - Camera.y,
+        null
+      );
     }
   }
 }

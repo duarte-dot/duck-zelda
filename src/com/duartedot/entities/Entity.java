@@ -1,6 +1,7 @@
 package com.duartedot.entities;
 
 import com.duartedot.main.Game;
+import com.duartedot.world.Camera;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -39,7 +40,7 @@ public class Entity {
   protected int width;
   protected int height;
 
-  private BufferedImage sprite;
+  public BufferedImage sprite;
 
   public Entity(int x, int y, int width, int height, BufferedImage sprite) {
     this.x = x;
@@ -85,6 +86,6 @@ public class Entity {
   public void tick() {}
 
   public void render(Graphics g) {
-    g.drawImage(sprite, this.getX(), this.getY(), null);
+    g.drawImage(sprite, this.getX() - Camera.x, this.getY() - Camera.y, null);
   }
 }
