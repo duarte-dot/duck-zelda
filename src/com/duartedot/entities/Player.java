@@ -8,6 +8,9 @@ import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
 
+  public static double life = 100;
+  public static int maxLife = 100;
+
   public boolean right, left, up, down;
   public int right_dir = 0, left_dir = 1;
   public int dir = right_dir;
@@ -83,6 +86,8 @@ public class Player extends Entity {
       }
     }
 
+    checkItems();
+
     Camera.x = Camera.clamp(
       this.getX() - (Game.WIDTH / 2),
       0,
@@ -94,6 +99,25 @@ public class Player extends Entity {
       0,
       World.HEIGHT * 16 - Game.HEIGHT
     );
+  }
+
+  public void checkItems() {
+    for (int i = 0; i < Game.entities.size(); i++) {
+      Entity e = Game.entities.get(i);
+
+      if (e instanceof LifePack) {
+        if (Entity.isColidding(this, e)) {
+          life += 100;
+
+          if (life >= maxLife) {
+            life = maxLife;
+          }
+
+          Game.entities.remove(i);
+          return;
+        }
+      }
+    }
   }
 
   public void render(Graphics g) {

@@ -45,9 +45,9 @@ public class World {
             Game.player.setY(j * 16);
           } else if (pixelAtual == 0xFFFF0000) {
             // Enemy
-            Game.entities.add(
-              new Enemy(i * 16, j * 16, 16, 16, Entity.ENEMY_EN)
-            );
+            Enemy en = new Enemy(i * 16, j * 16, 16, 16, Entity.ENEMY_EN);
+            Game.entities.add(en);
+            Game.enemies.add(en);
           } else if (pixelAtual == 0xFFD2701E) {
             // Weapon
             Game.entities.add(

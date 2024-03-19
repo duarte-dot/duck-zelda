@@ -1,8 +1,10 @@
 package com.duartedot.main;
 
+import com.duartedot.entities.Enemy;
 import com.duartedot.entities.Entity;
 import com.duartedot.entities.Player;
 import com.duartedot.graphics.Spritesheet;
+import com.duartedot.graphics.UI;
 import com.duartedot.world.World;
 import java.awt.Canvas;
 import java.awt.Color;
@@ -14,6 +16,8 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
@@ -37,11 +41,14 @@ public class Game extends Canvas implements Runnable, KeyListener {
   private BufferedImage image;
 
   public static List<Entity> entities;
+  public static List<Enemy> enemies;
   public static Spritesheet spritesheet;
 
   public static World world;
 
   public static Player player;
+
+  public static Random rand;
 
   // Controle de Jogo
   private Thread thread;
@@ -50,15 +57,20 @@ public class Game extends Canvas implements Runnable, KeyListener {
   // Janela do Jogo
   public static JFrame frame;
 
+  public UI ui;
+
   // Construtor
   public Game() {
+    rand = new Random();
     this.addKeyListener(this);
     this.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
     initFrame();
 
+    ui = new UI();
     image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
     entities = new ArrayList<Entity>();
+    enemies = new ArrayList<Enemy>();
 
     spritesheet = new Spritesheet("/spritesheet.png");
 
@@ -130,6 +142,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
       Entity e = entities.get(i);
       e.render(g);
     }
+
+    ui.render(g);
 
     g.dispose();
     g = bs.getDrawGraphics();
