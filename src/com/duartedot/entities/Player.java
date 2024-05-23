@@ -1,15 +1,17 @@
 package com.duartedot.entities;
 
+import com.duartedot.graphics.Spritesheet;
 import com.duartedot.main.Game;
 import com.duartedot.world.Camera;
 import com.duartedot.world.World;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class Player extends Entity {
 
-  public static double life = 100;
-  public static int maxLife = 100;
+  public double life = 100;
+  public int maxLife = 100;
 
   public boolean right, left, up, down;
   public int right_dir = 0, left_dir = 1;
@@ -25,10 +27,19 @@ public class Player extends Entity {
   private BufferedImage[] rightPlayer;
   private BufferedImage[] leftPlayer;
 
+  private BufferedImage playerDamage;
+
+  public int ammo = 0;
+
+  public boolean isDamaged = false;
+  private int damageFrames = 0;
+
   public Player(int x, int y, int width, int height, BufferedImage sprite) {
     super(x, y, width, height, sprite);
     rightPlayer = new BufferedImage[6];
     leftPlayer = new BufferedImage[6];
+
+    playerDamage = Game.spritesheet.getSprite(0, 32, 16, 16);
 
     for (int i = 0; i < 6; i++) {
       rightPlayer[i] = Game.spritesheet.getSprite(0 + (i * 16), 0, 16, 16);
@@ -88,17 +99,37 @@ public class Player extends Entity {
 
     checkItems();
 
+    if (isDamaged) {
+      damageFrames++;
+
+      if (damageFrames == 8) {
+        damageFrames = 0;
+        isDamaged = false;
+      }
+    }
+
+    if (life <= 0) {
+      Game.entities = new ArrayList<Entity>();
+      Game.enemies = new ArrayList<Enemy>();
+
+      Game.spritesheet = new Spritesheet("/spritesheet.png");
+
+      Game.player = new Player(0, 0, 16, 16, Game.spritesheet.getSprite(0, 0, 16, 16));
+      Game.world = new World("/map.png");
+
+      Game.entities.add(Game.player);
+      return;
+    }
+
     Camera.x = Camera.clamp(
-      this.getX() - (Game.WIDTH / 2),
-      0,
-      World.WIDTH * 16 - Game.WIDTH
-    );
+        this.getX() - (Game.WIDTH / 2),
+        0,
+        World.WIDTH * 16 - Game.WIDTH);
 
     Camera.y = Camera.clamp(
-      this.getY() - (Game.HEIGHT / 2),
-      0,
-      World.HEIGHT * 16 - Game.HEIGHT
-    );
+        this.getY() - (Game.HEIGHT / 2),
+        0,
+        World.HEIGHT * 16 - Game.HEIGHT);
   }
 
   public void checkItems() {
@@ -116,32 +147,43 @@ public class Player extends Entity {
           Game.entities.remove(i);
           return;
         }
+      } else if (e instanceof Bullet) {
+        if (Entity.isColidding(this, e)) {
+          ammo++;
+          Game.entities.remove(i);
+          return;
+        }
       }
     }
   }
 
   public void render(Graphics g) {
-    if (dir == right_dir) {
-      g.drawImage(
-        rightPlayer[index],
-        this.getX() - Camera.x,
-        this.getY() - Camera.y,
-        null
-      );
-    } else if (dir == left_dir) {
-      g.drawImage(
-        leftPlayer[index],
-        this.getX() - Camera.x,
-        this.getY() - Camera.y,
-        null
-      );
+    if (!isDamaged) {
+      if (dir == right_dir) {
+        g.drawImage(
+            rightPlayer[index],
+            this.getX() - Camera.x,
+            this.getY() - Camera.y,
+            null);
+      } else if (dir == left_dir) {
+        g.drawImage(
+            leftPlayer[index],
+            this.getX() - Camera.x,
+            this.getY() - Camera.y,
+            null);
+      } else {
+        g.drawImage(
+            rightPlayer[0],
+            this.getX() - Camera.x,
+            this.getY() - Camera.y,
+            null);
+      }
     } else {
       g.drawImage(
-        rightPlayer[0],
-        this.getX() - Camera.x,
-        this.getY() - Camera.y,
-        null
-      );
+          playerDamage,
+          this.getX() - Camera.x,
+          this.getY() - Camera.y,
+          null);
     }
   }
 }

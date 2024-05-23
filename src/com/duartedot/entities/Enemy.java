@@ -47,16 +47,10 @@ public class Enemy extends Entity {
         }
       } else {
         if (Game.rand.nextInt(100) < 10) {
-          Player.life -= Game.rand.nextInt(3);
+          Game.player.life -= Game.rand.nextInt(3);
+          Game.player.isDamaged = true;
 
-          if (Player.life <= 0) {
-            Player.life = 0;
-          }
-
-          if (Player.life <= 0) {
-            // Game Over
-            System.exit(1);
-          }
+          
         }
       }
     }
