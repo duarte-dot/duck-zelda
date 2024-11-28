@@ -1,11 +1,5 @@
 package com.duartedot.main;
 
-import com.duartedot.entities.Enemy;
-import com.duartedot.entities.Entity;
-import com.duartedot.entities.Player;
-import com.duartedot.graphics.Spritesheet;
-import com.duartedot.graphics.UI;
-import com.duartedot.world.World;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -22,215 +16,240 @@ import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
+import com.duartedot.entities.BulletShoot;
+import com.duartedot.entities.Enemy;
+import com.duartedot.entities.Entity;
+import com.duartedot.entities.Player;
+import com.duartedot.graphics.Spritesheet;
+import com.duartedot.graphics.UI;
+import com.duartedot.world.World;
+
 public class Game extends Canvas implements Runnable, KeyListener {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  // Variáveis de Dimensão da Janela
-  //  public static final int WIDTH = 160;
-  //  public static final int HEIGHT = 120;
+	// Variáveis de Dimensão da Janela
+	// public static final int WIDTH = 160;
+	// public static final int HEIGHT = 120;
 
-  public static final int WIDTH = 240;
-  public static final int HEIGHT = 160;
+	public static final int WIDTH = 240;
+	public static final int HEIGHT = 160;
 
-  //  public static final int WIDTH = 320;
-  //  public static final int HEIGHT = 240;
+	// public static final int WIDTH = 320;
+	// public static final int HEIGHT = 240;
 
-  private final int SCALE = 3;
+	private final int SCALE = 3;
 
-  // Componentes Gráficos
-  private BufferedImage image;
+	// Componentes Gráficos
+	private BufferedImage image;
 
-  public static List<Entity> entities;
-  public static List<Enemy> enemies;
-  public static Spritesheet spritesheet;
+	public static List<Entity> entities;
+	public static List<Enemy> enemies;
+	public static List<BulletShoot> bullets;
 
-  public static World world;
+	public static Spritesheet spritesheet;
 
-  public static Player player;
+	public static World world;
 
-  public static Random rand;
+	public static Player player;
 
-  // Controle de Jogo
-  private Thread thread;
-  private boolean isRunning = false;
+	public static Random rand;
 
-  // Janela do Jogo
-  public static JFrame frame;
+	// Controle de Jogo
+	private Thread thread;
+	private boolean isRunning = false;
 
-  public UI ui;
+	// Janela do Jogo
+	public static JFrame frame;
 
-  // Construtor
-  public Game() {
-    rand = new Random();
-    this.addKeyListener(this);
-    this.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
-    initFrame();
+	public UI ui;
 
-    ui = new UI();
-    image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+	// Construtor
+	public Game() {
+		rand = new Random();
+		this.addKeyListener(this);
+		this.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
+		initFrame();
 
-    entities = new ArrayList<Entity>();
-    enemies = new ArrayList<Enemy>();
+		ui = new UI();
+		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 
-    spritesheet = new Spritesheet("/spritesheet.png");
+		entities = new ArrayList<Entity>();
+		enemies = new ArrayList<Enemy>();
 
-    player = new Player(0, 0, 16, 16, spritesheet.getSprite(0, 0, 16, 16));
-    world = new World("/map.png");
+		bullets = new ArrayList<BulletShoot>();
 
-    entities.add(player);
-    // setFocusable(false);
-  }
+		spritesheet = new Spritesheet("/spritesheet.png");
 
-  // Método para Inicialização da Janela do Jogo
-  public void initFrame() {
-    frame = new JFrame("Duck Zelda");
-    frame.add(this);
-    frame.setResizable(false);
-    frame.pack();
-    frame.setLocationRelativeTo(null);
-    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    frame.setVisible(true);
-  }
+		player = new Player(0, 0, 16, 16, spritesheet.getSprite(0, 0, 16, 16));
+		world = new World("/map.png");
 
-  // Métodos de Controle de Thread do Jogo
-  public synchronized void start() {
-    thread = new Thread(this);
-    isRunning = true;
-    thread.start();
-  }
+		entities.add(player);
+		// setFocusable(false);
+	}
 
-  public synchronized void stop() {
-    isRunning = false;
-    try {
-      thread.join();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-  }
+	// Método para Inicialização da Janela do Jogo
+	public void initFrame() {
+		frame = new JFrame("Duck Zelda");
+		frame.add(this);
+		frame.setResizable(false);
+		frame.pack();
+		frame.setLocationRelativeTo(null);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+	}
 
-  // Método Principal do Jogo
-  public static void main(String args[]) {
-    Game game = new Game();
-    game.start();
-  }
+	// Métodos de Controle de Thread do Jogo
+	public synchronized void start() {
+		thread = new Thread(this);
+		isRunning = true;
+		thread.start();
+	}
 
-  // Métodos de Atualização do Jogo
-  public void tick() {
-    for (int i = 0; i < entities.size(); i++) {
-      Entity e = entities.get(i);
-      e.tick();
-    }
-  }
+	public synchronized void stop() {
+		isRunning = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 
-  // Métodos de Renderização do Jogo
-  public void render() {
-    BufferStrategy bs = this.getBufferStrategy();
-    if (bs == null) {
-      this.createBufferStrategy(3);
-      return;
-    }
+	// Método Principal do Jogo
+	public static void main(String args[]) {
+		Game game = new Game();
+		game.start();
+	}
 
-    Graphics g = image.getGraphics();
-    g.setColor(new Color(19, 19, 19));
-    g.fillRect(0, 0, WIDTH, HEIGHT);
+	// Métodos de Atualização do Jogo
+	public void tick() {
+		for (int i = 0; i < entities.size(); i++) {
+			Entity e = entities.get(i);
+			e.tick();
+		}
 
-    // Graphics2D g2 = (Graphics2D) g;
+		for (int i = 0; i < bullets.size(); i++) {
+			bullets.get(i).tick();
+		}
+	}
 
-    world.render(g);
+	// Métodos de Renderização do Jogo
+	public void render() {
+		BufferStrategy bs = this.getBufferStrategy();
+		if (bs == null) {
+			this.createBufferStrategy(3);
+			return;
+		}
 
-    for (int i = 0; i < entities.size(); i++) {
-      Entity e = entities.get(i);
-      e.render(g);
-    }
+		Graphics g = image.getGraphics();
+		g.setColor(new Color(19, 19, 19));
+		g.fillRect(0, 0, WIDTH, HEIGHT);
 
-    ui.render(g);
+		// Graphics2D g2 = (Graphics2D) g;
 
-    g.dispose();
-    g = bs.getDrawGraphics();
-    g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
-    g.setFont(new Font("arial", Font.BOLD, 20));
-    g.setColor(Color.white);
-    g.drawString("Munição: " + player.ammo, 560, 31);
-    bs.show();
-  }
+		world.render(g);
 
-  // Método de execução da Thread
-  @Override
-  public void run() {
-    long lastTime = System.nanoTime();
-    double amountOfTicks = 60.0;
-    double ns = 1000000000 / amountOfTicks;
-    double delta = 0;
+		for (int i = 0; i < entities.size(); i++) {
+			Entity e = entities.get(i);
+			e.render(g);
+		}
 
-    int frames = 0;
-    double timer = System.currentTimeMillis();
-    requestFocus();
-    while (isRunning) {
-      long now = System.nanoTime();
-      delta += (now - lastTime) / ns;
+		for (int i = 0; i < bullets.size(); i++) {
+			bullets.get(i).render(g);
+		}
 
-      lastTime = now;
+		ui.render(g);
 
-      if (delta >= 1) {
-        tick();
-        render();
-        frames++;
-        delta--;
-      }
+		g.dispose();
+		g = bs.getDrawGraphics();
+		g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
+		g.setFont(new Font("arial", Font.BOLD, 20));
+		g.setColor(Color.white);
+		g.drawString("Munição: " + player.ammo, 560, 31);
+		bs.show();
+	}
 
-      if (System.currentTimeMillis() - timer >= 1000) {
-        System.out.println("FPS:" + frames);
-        frames = 0;
-        timer += 1000;
-      }
-    }
+	// Método de execução da Thread
+	@Override
+	public void run() {
+		long lastTime = System.nanoTime();
+		double amountOfTicks = 60.0;
+		double ns = 1000000000 / amountOfTicks;
+		double delta = 0;
 
-    stop();
-  }
+		int frames = 0;
+		double timer = System.currentTimeMillis();
+		requestFocus();
+		while (isRunning) {
+			long now = System.nanoTime();
+			delta += (now - lastTime) / ns;
 
-  @Override
-  public void keyPressed(KeyEvent e) {
-    if (
-      e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D
-    ) {
-      player.right = true;
-    }
+			lastTime = now;
 
-    if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
-      player.left = true;
-    }
+			if (delta >= 1) {
+				tick();
+				render();
+				frames++;
+				delta--;
+			}
 
-    if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
-      player.up = true;
-    }
+			if (System.currentTimeMillis() - timer >= 1000) {
+				System.out.println("FPS:" + frames);
+				frames = 0;
+				timer += 1000;
+			}
+		}
 
-    if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
-      player.down = true;
-    }
-  }
+		stop();
+	}
 
-  @Override
-  public void keyReleased(KeyEvent e) {
-    if (
-      e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D
-    ) {
-      player.right = false;
-    }
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D) {
+			player.right = true;
+		}
 
-    if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
-      player.left = false;
-    }
+		if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
+			player.left = true;
+		}
 
-    if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
-      player.up = false;
-    }
+		if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
+			player.up = true;
+		}
 
-    if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
-      player.down = false;
-    }
-  }
+		if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
+			player.down = true;
+		}
 
-  @Override
-  public void keyTyped(KeyEvent e) {}
+		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+			player.shoot = true;
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT || e.getKeyCode() == KeyEvent.VK_D) {
+			player.right = false;
+		}
+
+		if (e.getKeyCode() == KeyEvent.VK_LEFT || e.getKeyCode() == KeyEvent.VK_A) {
+			player.left = false;
+		}
+
+		if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) {
+			player.up = false;
+		}
+
+		if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_S) {
+			player.down = false;
+		}
+
+		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+			player.shoot = false;
+		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+	}
 }
